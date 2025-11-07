@@ -9,6 +9,7 @@ license = "MIT"
 readme = "README.md"
 requires-python = ">=3.12"
 dynamic = ["dependencies"]
+dependencies = ["winipedia-utils", "django"]
 
 
 [build-system]
@@ -18,10 +19,6 @@ build-backend = "poetry.core.masonry.api"
 
 [[tool.poetry.packages]]
 include = "winipedia_django"
-
-[tool.poetry.dependencies]
-winipedia-utils = "*"
-django = "*"
 
 [tool.poetry.group.dev.dependencies]
 mypy = "*"
@@ -35,6 +32,7 @@ pytest = "*"
 types-pyyaml = "*"
 types-defusedxml = "*"
 bandit = "*"
+types-networkx = "*"
 
 [tool.ruff]
 exclude = [".*", "**/migrations/*.py"]
