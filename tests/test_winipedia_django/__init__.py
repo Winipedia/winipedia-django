@@ -1,6 +1,6 @@
 """__init__ module."""
 
-from winipedia_utils.logging.logger import get_logger
+from winipedia_utils.utils.logging.logger import get_logger
 
 import winipedia_django
 

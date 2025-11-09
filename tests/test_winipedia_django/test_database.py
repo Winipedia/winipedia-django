@@ -1,7 +1,7 @@
 """Tests for winipedia_django.database module."""
 
 from django.db import models
-from winipedia_utils.testing.assertions import assert_with_msg
+from winipedia_utils.utils.testing.assertions import assert_with_msg
 
 from winipedia_django.database import (
     BaseModel,

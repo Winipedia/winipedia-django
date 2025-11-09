@@ -13,7 +13,7 @@ from django.db import connection
 from django.db.models import DateTimeField, Field, Model
 from django.db.models.fields.related import ForeignKey, ForeignObjectRel
 from django.forms.models import model_to_dict
-from winipedia_utils.logging.logger import get_logger
+from winipedia_utils.utils.logging.logger import get_logger
 
 if TYPE_CHECKING:
     from django.contrib.contenttypes.fields import GenericForeignKey

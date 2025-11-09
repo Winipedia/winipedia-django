@@ -4,8 +4,8 @@ from argparse import ArgumentParser
 from typing import Any, final
 
 import pytest
-from winipedia_utils.oop.mixins.mixin import ABCLoggingMixin
-from winipedia_utils.testing.assertions import assert_with_msg
+from winipedia_utils.utils.oop.mixins.mixin import ABCLoggingMixin
+from winipedia_utils.utils.testing.assertions import assert_with_msg
 
 from winipedia_django.command import ABCBaseCommand
 

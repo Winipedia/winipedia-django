@@ -18,8 +18,8 @@ from django.db.models import (
     QuerySet,
 )
 from django.db.models.deletion import Collector
-from winipedia_utils.concurrent.multithreading import multithread_loop
-from winipedia_utils.logging.logger import get_logger
+from winipedia_utils.utils.iterating.concurrent.multithreading import multithread_loop
+from winipedia_utils.utils.logging.logger import get_logger
 
 from winipedia_django.database import (
     hash_model_instance,

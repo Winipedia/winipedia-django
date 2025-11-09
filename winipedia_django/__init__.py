@@ -3,7 +3,7 @@
 import django
 import django_stubs_ext
 from django.conf import settings
-from winipedia_utils.logging.logger import get_logger
+from winipedia_utils.utils.logging.logger import get_logger
 
 logger = get_logger(__name__)
 
