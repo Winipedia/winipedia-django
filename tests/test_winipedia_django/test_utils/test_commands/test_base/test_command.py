@@ -7,7 +7,7 @@ import pytest
 from winipedia_utils.utils.oop.mixins.mixin import ABCLoggingMixin
 from winipedia_utils.utils.testing.assertions import assert_with_msg
 
-from winipedia_django.command import ABCBaseCommand
+from winipedia_django.utils.commands.base.command import ABCBaseCommand
 
 
 class TestABCBaseCommand:

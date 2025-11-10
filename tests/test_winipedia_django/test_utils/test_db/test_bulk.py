@@ -5,9 +5,11 @@ from typing import TYPE_CHECKING, Any, cast
 
 import pytest
 from django.db import models
+from winipedia_utils.utils.modules.module import make_obj_importpath
 from winipedia_utils.utils.testing.assertions import assert_with_msg
 
-from winipedia_django.bulk import (
+from winipedia_django.utils.db import bulk
+from winipedia_django.utils.db.bulk import (
     MODE_CREATE,
     MODE_DELETE,
     MODE_UPDATE,
@@ -25,7 +27,7 @@ from winipedia_django.bulk import (
     multi_simulate_bulk_deletion,
     simulate_bulk_deletion,
 )
-from winipedia_django.database import get_fields
+from winipedia_django.utils.db.fields import get_fields
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
@@ -732,7 +734,7 @@ def test_simulate_bulk_deletion() -> None:
                 for entry in entries:
                     self.data[entry.__class__].add(entry)
 
-        m.setattr("winipedia_django.bulk.Collector", MockCollector)
+        m.setattr(make_obj_importpath(bulk) + ".Collector", MockCollector)
 
         result = simulate_bulk_deletion(SimulateDeleteTestModel, test_instances)
 
@@ -792,7 +794,7 @@ def test_multi_simulate_bulk_deletion() -> None:
             }  # Only take first item to avoid hashing issues
 
         m.setattr(
-            "winipedia_django.bulk.simulate_bulk_deletion",
+            make_obj_importpath(simulate_bulk_deletion),
             mock_simulate_bulk_deletion,
         )
 

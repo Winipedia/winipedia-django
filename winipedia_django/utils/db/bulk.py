@@ -21,7 +21,7 @@ from django.db.models.deletion import Collector
 from winipedia_utils.utils.iterating.concurrent.multithreading import multithread_loop
 from winipedia_utils.utils.logging.logger import get_logger
 
-from winipedia_django.database import (
+from winipedia_django.utils.db.models import (
     hash_model_instance,
     topological_sort_models,
 )
