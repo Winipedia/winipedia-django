@@ -31,6 +31,7 @@ def execute_sql(
             - list[str]: Column names from the query result
             - list[Any]: List of result rows, where each row is a tuple
               of values corresponding to the column names
+        Empty list if no results are returned
 
     Raises:
         django.db.Error: If there's a database error during query execution
@@ -55,6 +56,8 @@ def execute_sql(
     with connection.cursor() as cursor:
         cursor.execute(sql=sql, params=params)
         rows = cursor.fetchall()
-        column_names = [col[0] for col in cursor.description]
+        column_names = (
+            [col[0] for col in cursor.description] if cursor.description else []
+        )
 
     return column_names, rows

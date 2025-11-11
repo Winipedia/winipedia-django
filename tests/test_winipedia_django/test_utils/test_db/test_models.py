@@ -125,7 +125,7 @@ def test_topological_sort_models() -> None:
     )
 
     # Test with empty list
-    empty_result = topological_sort_models([])
+    empty_result: list[type[models.Model]] = topological_sort_models([])
     assert_with_msg(
         empty_result == [],
         "Expected empty list to return empty list",
@@ -236,9 +236,7 @@ class TestBaseModel:
                 app_label = "test_app"
 
         test_instance = TestModel(name="test", value=42)
-        expected = (
-            "TestModel(id=None, created_at=None, updated_at=None, name=test, value=42)"
-        )
+        expected = "TestModel(None)"
         assert_with_msg(
             str(test_instance) == expected,
             f"Expected '{expected}', got {test_instance}",
@@ -257,9 +255,7 @@ class TestBaseModel:
                 app_label = "test_app"
 
         test_instance = TestModel2(name="test", value=42)
-        expected = (
-            "TestModel2(id=None, created_at=None, updated_at=None, name=test, value=42)"
-        )
+        expected = "TestModel2(None)"
         assert_with_msg(
             repr(test_instance) == expected,
             f"Expected '{expected}', got {test_instance}",

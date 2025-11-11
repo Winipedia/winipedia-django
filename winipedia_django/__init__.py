@@ -19,5 +19,6 @@ if not settings.configured:
                 "NAME": ":memory:",
             }
         },
+        INSTALLED_APPS=["tests"],
     )
     django.setup()

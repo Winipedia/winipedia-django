@@ -8,7 +8,7 @@ managing and automating Django command-line tasks.
 import logging
 from abc import abstractmethod
 from argparse import ArgumentParser
-from typing import Any, final
+from typing import Any
 
 from django.core.management import BaseCommand
 from winipedia_utils.utils.oop.mixins.mixin import ABCLoggingMixin
@@ -54,7 +54,18 @@ class ABCBaseCommand(ABCLoggingMixin, BaseCommand):
         - The @final decorator prevents overriding of template methods
     """
 
-    @final
+    class Options:
+        """Just a container class for hard coding the option keys."""
+
+        DRY_RUN = "dry_run"
+        FORCE = "force"
+        DELETE = "delete"
+        YES = "yes"
+        TIMEOUT = "timeout"
+        BATCH_SIZE = "batch_size"
+        THREADS = "threads"
+        PROCESSES = "processes"
+
     def add_arguments(self, parser: ArgumentParser) -> None:
         """Configure command-line arguments for the Django management command.
 
@@ -77,13 +88,12 @@ class ABCBaseCommand(ABCLoggingMixin, BaseCommand):
             - Subclasses must implement add_command_arguments() for specific needs
         """
         # add base args that are used in most commands
-        self._add_arguments(parser)
+        self.base_add_arguments(parser)
 
         # add additional args that are specific to the command
         self.add_command_arguments(parser)
 
-    @final
-    def _add_arguments(self, parser: ArgumentParser) -> None:
+    def base_add_arguments(self, parser: ArgumentParser) -> None:
         """Add common command-line arguments used across multiple commands.
 
         This method defines base arguments that are commonly used across different
@@ -104,85 +114,53 @@ class ABCBaseCommand(ABCLoggingMixin, BaseCommand):
             - Command-specific arguments should be added via add_command_arguments()
         """
         parser.add_argument(
-            "--dry-run",
+            f"--{self.Options.DRY_RUN}",
             action="store_true",
             help="Show what would be done without actually executing the changes",
         )
 
         parser.add_argument(
-            "--size",
-            type=int,
-            default=None,
-            help="Size of smth in a command",
-        )
-
-        parser.add_argument(
-            "--force",
+            f"--{self.Options.FORCE}",
             action="store_true",
             help="Force an action in a command",
         )
 
         parser.add_argument(
-            "--delete",
+            f"--{self.Options.DELETE}",
             action="store_true",
             help="Deleting smth in a command",
         )
 
         parser.add_argument(
-            "--quiet",
-            action="store_true",
-            help="Suppress non-error output for cleaner automation",
-        )
-
-        parser.add_argument(
-            "--debug",
-            action="store_true",
-            help="Print debug output for detailed tracing",
-        )
-
-        parser.add_argument(
-            "--yes",
+            f"--{self.Options.YES}",
             action="store_true",
             help="Answer yes to all prompts",
             default=False,
         )
 
         parser.add_argument(
-            "--config",
-            type=str,
-            help="A configuration setup like filepath or json string for a command",
-            default=None,
-        )
-
-        parser.add_argument(
-            "--timeout",
+            f"--{self.Options.TIMEOUT}",
             type=int,
             help="Timeout for a command",
             default=None,
         )
 
         parser.add_argument(
-            "--batch-size",
+            f"--{self.Options.BATCH_SIZE}",
             type=int,
             default=None,
             help="Number of items to process in each batch",
         )
 
         parser.add_argument(
-            "--no-input",
-            action="store_true",
-            help="Do not prompt for user input",
-        )
-
-        parser.add_argument(
-            "--threads",
+            f"--{self.Options.THREADS}",
             type=int,
             default=None,
             help="Number of threads to use for processing",
         )
 
         parser.add_argument(
-            "--processes",
+            f"--{self.Options.PROCESSES}",
             type=int,
             default=None,
             help="Number of processes to use for processing",
@@ -226,7 +204,6 @@ class ABCBaseCommand(ABCLoggingMixin, BaseCommand):
             - Should focus on command-specific functionality only
         """
 
-    @final
     def handle(self, *args: Any, **options: Any) -> None:
         """Execute the Django management command using template method pattern.
 
@@ -249,11 +226,10 @@ class ABCBaseCommand(ABCLoggingMixin, BaseCommand):
             - Command-specific logic is executed via abstract handle_command()
             - All method calls are automatically logged with performance tracking
         """
-        self._handle(*args, **options)
-        self.handle_command(*args, **options)
+        self.base_handle(*args, **options)
+        self.handle_command()
 
-    @final
-    def _handle(self, *_args: Any, **options: Any) -> None:
+    def base_handle(self, *args: Any, **options: Any) -> None:
         """Execute common handling logic shared across all commands.
 
         This method is intended to contain common processing logic that should
@@ -276,17 +252,11 @@ class ABCBaseCommand(ABCLoggingMixin, BaseCommand):
             - The @final decorator prevents subclasses from overriding this method
             - Called before handle_command() in the template method pattern
         """
-        # log each option for the command
-        for key, value in options.items():
-            logger.info(
-                "Command '%s' - runs with option: '%s' with value: '%s'",
-                self.__class__.__name__,
-                key,
-                value,
-            )
+        self.args = args
+        self.options = options
 
     @abstractmethod
-    def handle_command(self, *args: Any, **options: Any) -> None:
+    def handle_command(self) -> None:
         """Execute command-specific logic and functionality.
 
         This abstract method must be implemented by subclasses to define the
@@ -299,13 +269,11 @@ class ABCBaseCommand(ABCLoggingMixin, BaseCommand):
         or any other command-specific tasks.
 
         Args:
-            *args: Positional arguments passed from Django's command execution.
-                These are typically not used in Django management commands.
-            **options: Keyword arguments containing parsed command-line options
-                and their values as defined by add_command_arguments().
+            None, args and options are stored in self.args and self.options
 
         Example:
-            >>> def handle_command(self, *args, **options):
+            >>> def handle_command(self):
+            ...     args, options = self.args, self.options
             ...     input_file = options['input_file']
             ...     dry_run = options['dry_run']  # Base argument
             ...     batch_size = options['batch_size']  # Base argument
@@ -331,3 +299,7 @@ class ABCBaseCommand(ABCLoggingMixin, BaseCommand):
             - All method calls are automatically logged with performance tracking
             - Use self.stdout.write() for output instead of print()
         """
+
+    def get_option(self, option: str) -> Any:
+        """Get an option from the command options."""
+        return self.options[option]

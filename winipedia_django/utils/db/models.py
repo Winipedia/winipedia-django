@@ -7,7 +7,7 @@ These utilities help with efficient and safe database interactions.
 
 from datetime import datetime
 from graphlib import TopologicalSorter
-from typing import TYPE_CHECKING, Any, Self
+from typing import TYPE_CHECKING, Any, Self, cast
 
 from django.db.models import DateTimeField, Field, Model
 from django.db.models.fields.related import ForeignKey, ForeignObjectRel
@@ -23,7 +23,9 @@ if TYPE_CHECKING:
 logger = get_logger(__name__)
 
 
-def topological_sort_models(models: list[type[Model]]) -> list[type[Model]]:
+def topological_sort_models[TModel: Model](
+    models: list[type[TModel]],
+) -> list[type[TModel]]:
     """Sort Django models in dependency order using topological sorting.
 
     Analyzes foreign key relationships between Django models and returns them
@@ -61,11 +63,11 @@ def topological_sort_models(models: list[type[Model]]) -> list[type[Model]]:
         - Self-referential foreign keys are ignored to avoid self-loops
         - Only relationships between models in the input list are considered
     """
-    ts: TopologicalSorter[type[Model]] = TopologicalSorter()
+    ts: TopologicalSorter[type[TModel]] = TopologicalSorter()
 
     for model in models:
         deps = {
-            field.related_model
+            cast("type[TModel]", field.related_model)
             for field in get_fields(model)
             if isinstance(field, ForeignKey)
             and isinstance(field.related_model, type)
@@ -130,11 +132,7 @@ class BaseModel(Model):
         Returns:
             str: The string representation of the model as all fields and their values.
         """
-        fields_values = ", ".join(
-            f"{field.name}={getattr(self, field.name)}"
-            for field in get_fields(self.__class__)
-        )
-        return f"{self.__class__.__name__}({fields_values})"
+        return f"{self.__class__.__name__}({self.pk})"
 
     def __repr__(self) -> str:
         """Base representation of a model."""

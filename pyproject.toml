@@ -32,6 +32,7 @@ types-pyyaml = "*"
 types-defusedxml = "*"
 bandit = "*"
 types-networkx = "*"
+pytest-django = "*"
 
 
 [tool.poetry.dependencies]

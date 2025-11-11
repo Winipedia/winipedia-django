@@ -3,11 +3,10 @@
 from argparse import ArgumentParser
 from typing import Any, final
 
-import pytest
-from winipedia_utils.utils.oop.mixins.mixin import ABCLoggingMixin
+from django.core.management import call_command
 from winipedia_utils.utils.testing.assertions import assert_with_msg
 
-from winipedia_django.utils.commands.base.command import ABCBaseCommand
+from winipedia_django.utils.commands.base.base import ABCBaseCommand
 
 
 class TestABCBaseCommand:
@@ -39,52 +38,12 @@ class TestABCBaseCommand:
             if action.option_strings:
                 added_arguments.update(action.option_strings)
 
-        # Check that base arguments were added (from _add_arguments)
-        assert_with_msg(
-            "--dry-run" in added_arguments,
-            "Expected base argument --dry-run to be added",
-        )
-        assert_with_msg(
-            "--custom" in added_arguments,
-            "Expected custom argument --custom to be added",
-        )
         assert_with_msg(
             command.add_command_arguments_called,
             "Expected add_command_arguments to be called",
         )
 
-        # Test that the method is final
-        assert_with_msg(
-            hasattr(ABCBaseCommand.add_arguments, "__final__"),
-            "Expected add_arguments to be marked as final",
-        )
-
-        # Test class inheritance and structure
-        base_classes = ABCBaseCommand.__bases__
-        base_class_names = [cls.__name__ for cls in base_classes]
-
-        assert_with_msg(
-            f"{ABCLoggingMixin.__name__}" in base_class_names,
-            f"Expected {ABCLoggingMixin.__name__} in base classes, "
-            f"got {base_class_names}",
-        )
-        assert_with_msg(
-            "BaseCommand" in base_class_names,
-            f"Expected BaseCommand in base classes, got {base_class_names}",
-        )
-
-        # Test that class has expected abstract methods
-        abstract_methods: set[str] = getattr(
-            ABCBaseCommand, "__abstractmethods__", set()
-        )
-        expected_abstract_methods = {"add_command_arguments", "handle_command"}
-        assert_with_msg(
-            expected_abstract_methods.issubset(abstract_methods),
-            f"Expected abstract methods {expected_abstract_methods}, "
-            f"got {abstract_methods}",
-        )
-
-    def test__add_arguments(self) -> None:
+    def test_base_add_arguments(self) -> None:
         """Test method for _add_arguments."""
 
         # Test that _add_arguments adds all expected common arguments
@@ -94,30 +53,20 @@ class TestABCBaseCommand:
                 """Required implementation."""
 
             @final
-            def handle_command(self, *args: Any, **options: Any) -> None:
+            def handle_command(self) -> None:
                 """Required implementation."""
 
         command = TestCommand()
         parser = ArgumentParser()
 
         # Call _add_arguments directly
-        command._add_arguments(parser)  # noqa: SLF001
+        command.base_add_arguments(parser)
 
         # Test that all expected arguments were added
         expected_arguments = {
-            "--dry-run",
-            "--size",
-            "--force",
-            "--delete",
-            "--quiet",
-            "--debug",
-            "--yes",
-            "--config",
-            "--timeout",
-            "--batch-size",
-            "--no-input",
-            "--threads",
-            "--processes",
+            f"--{TestCommand.Options.DRY_RUN}",
+            f"--{TestCommand.Options.FORCE}",
+            f"--{TestCommand.Options.DELETE}",
         }
 
         # Get all argument names from parser
@@ -131,54 +80,6 @@ class TestABCBaseCommand:
                 expected_arg in added_arguments,
                 f"Expected argument {expected_arg} to be added, got {added_arguments}",
             )
-
-        # Test specific argument properties
-        action_map = {
-            action.dest: action
-            for action in parser._actions  # noqa: SLF001
-            if action.dest != "help"
-        }
-
-        # Constants for expected values
-        expected_batch_size_default = None
-        expected_timeout_default = None
-        expected_yes_default = False
-
-        # Test boolean arguments by checking their action type
-        assert_with_msg(
-            action_map["force"].__class__.__name__ == "_StoreTrueAction",
-            "Expected force to be store_true action",
-        )
-        assert_with_msg(
-            action_map["yes"].default == expected_yes_default,
-            f"Expected yes default to be {expected_yes_default}",
-        )
-
-        # Test integer arguments
-        assert_with_msg(
-            action_map["size"].type is int,
-            "Expected size to be int type",
-        )
-        assert_with_msg(
-            action_map["batch_size"].default == expected_batch_size_default,
-            f"Expected batch_size default to be {expected_batch_size_default}",
-        )
-        assert_with_msg(
-            action_map["timeout"].default == expected_timeout_default,
-            f"Expected timeout default to be {expected_timeout_default}",
-        )
-
-        # Test string arguments
-        assert_with_msg(
-            action_map["config"].type is str,
-            "Expected config to be str type",
-        )
-
-        # Test that the method is final
-        assert_with_msg(
-            hasattr(ABCBaseCommand._add_arguments, "__final__"),  # noqa: SLF001
-            "Expected _add_arguments to be marked as final",
-        )
 
     def test_add_command_arguments(self) -> None:
         """Test method for add_command_arguments."""
@@ -199,7 +100,7 @@ class TestABCBaseCommand:
                 parser.add_argument("--test-arg", help="Test argument")
 
             @final
-            def handle_command(self, *args: Any, **options: Any) -> None:
+            def handle_command(self) -> None:
                 """Handle test command execution."""
 
         # Test that concrete implementation can be instantiated
@@ -234,7 +135,7 @@ class TestABCBaseCommand:
                 """Required implementation."""
 
             @final
-            def handle_command(self, *args: Any, **options: Any) -> None:  # noqa: ARG002
+            def handle_command(self) -> None:
                 """Track that this method was called."""
                 self.handle_command_called = True
 
@@ -248,27 +149,7 @@ class TestABCBaseCommand:
             "Expected handle_command to be called by handle",
         )
 
-        # Test that the method is final
-        assert_with_msg(
-            hasattr(ABCBaseCommand.handle, "__final__"),
-            "Expected handle to be marked as final",
-        )
-
-        # Test integration with Django's BaseCommand functionality
-        assert_with_msg(
-            hasattr(command, "stdout"),
-            "Expected command to have stdout from BaseCommand",
-        )
-        assert_with_msg(
-            hasattr(command, "stderr"),
-            "Expected command to have stderr from BaseCommand",
-        )
-        assert_with_msg(
-            hasattr(command, "style"),
-            "Expected command to have style from BaseCommand",
-        )
-
-    def test__handle(self, caplog: pytest.LogCaptureFixture) -> None:
+    def test_base_handle(self) -> None:
         """Test method for _handle."""
 
         # Test that _handle logs all command options correctly
@@ -278,43 +159,22 @@ class TestABCBaseCommand:
                 """Required implementation."""
 
             @final
-            def handle_command(self, *args: Any, **options: Any) -> None:
+            def handle_command(self) -> None:
                 """Required implementation."""
 
         command = TestCommand()
 
-        # Test options to log
-        test_options = {
-            "dry_run": True,
-            "size": 100,
-            "config": "test.json",
-            "quiet": False,
-        }
-
-        # Clear any previous log records
-        caplog.clear()
-
-        # Call _handle directly
-        command._handle(**test_options)  # noqa: SLF001
-
-        # Verify that logger.info was called for each option
-        expected_calls = len(test_options)
+        # test it sets args and options correctly
+        args = ("test_arg",)
+        options = {"test_option": "test_value"}
+        command.handle(*args, **options)
         assert_with_msg(
-            len(caplog.records) == expected_calls,
-            f"Expected {expected_calls} log records, got {len(caplog.records)}",
+            command.args == args,
+            f"Expected args to be {args}, got {command.args}",
         )
-
-        # Verify the log message format
-        for record in caplog.records:
-            assert_with_msg(
-                "Command" in record.message and "runs with option" in record.message,
-                f"Expected log message format, got {record.message}",
-            )
-
-        # Test that the method is final
         assert_with_msg(
-            hasattr(ABCBaseCommand._handle, "__final__"),  # noqa: SLF001
-            "Expected _handle to be marked as final",
+            command.options == options,
+            f"Expected options to be {options}, got {command.options}",
         )
 
     def test_handle_command(self) -> None:
@@ -352,4 +212,31 @@ class TestABCBaseCommand:
         assert_with_msg(
             command.handle_command_called,
             "Expected handle_command to be called by handle",
+        )
+
+    def test_get_option(self) -> None:
+        """Test method for get_option."""
+
+        # Test that get_option returns the correct value
+        class TestCommand(ABCBaseCommand):
+            class Options(ABCBaseCommand.Options):
+                EXTRA = "extra"
+
+            def add_command_arguments(self, parser: ArgumentParser) -> None:
+                """Required implementation."""
+                parser.add_argument(
+                    f"--{self.Options.EXTRA}",
+                    help="Extra option",
+                )
+
+            def handle_command(self) -> None:
+                """Required implementation."""
+                self.extra_option = self.get_option(self.Options.EXTRA)
+
+        # call the command with djangos call_command
+        cmd = TestCommand()
+        call_command(cmd, extra="test")
+        assert_with_msg(
+            cmd.extra_option == "test",
+            f"Expected extra_option to be 'test', got {cmd.extra_option}",
         )

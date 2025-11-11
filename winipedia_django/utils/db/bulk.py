@@ -9,7 +9,7 @@ from collections import defaultdict
 from collections.abc import Callable, Generator, Iterable
 from functools import partial
 from itertools import islice
-from typing import TYPE_CHECKING, Any, Literal, cast, get_args
+from typing import TYPE_CHECKING, Any, Literal, cast, get_args, overload
 
 from django.db import router, transaction
 from django.db.models import (
@@ -42,11 +42,11 @@ MODE_DELETE = MODES[2]
 STANDARD_BULK_SIZE = 1000
 
 
-def bulk_create_in_steps(
-    model: type[Model],
-    bulk: Iterable[Model],
+def bulk_create_in_steps[TModel: Model](
+    model: type[TModel],
+    bulk: Iterable[TModel],
     step: int = STANDARD_BULK_SIZE,
-) -> list[Model]:
+) -> list[TModel]:
     """Create model instances from bulk and saves them to the database in steps.
 
     Takes a list of model instances and creates them in the database in steps.
@@ -63,14 +63,14 @@ def bulk_create_in_steps(
         list[Model]: a list of created objects.
     """
     return cast(
-        "list[Model]",
+        "list[TModel]",
         bulk_method_in_steps(model=model, bulk=bulk, step=step, mode=MODE_CREATE),
     )
 
 
-def bulk_update_in_steps(
-    model: type[Model],
-    bulk: Iterable[Model],
+def bulk_update_in_steps[TModel: Model](
+    model: type[TModel],
+    bulk: Iterable[TModel],
     update_fields: list[str],
     step: int = STANDARD_BULK_SIZE,
 ) -> int:
@@ -98,8 +98,8 @@ def bulk_update_in_steps(
     )
 
 
-def bulk_delete_in_steps(
-    model: type[Model], bulk: Iterable[Model], step: int = STANDARD_BULK_SIZE
+def bulk_delete_in_steps[TModel: Model](
+    model: type[TModel], bulk: Iterable[TModel], step: int = STANDARD_BULK_SIZE
 ) -> tuple[int, dict[str, int]]:
     """Delete model instances from the database in steps using multithreading.
 
@@ -130,13 +130,43 @@ def bulk_delete_in_steps(
     )
 
 
-def bulk_method_in_steps(
-    model: type[Model],
-    bulk: Iterable[Model],
+@overload
+def bulk_method_in_steps[TModel: Model](
+    model: type[TModel],
+    bulk: Iterable[TModel],
+    step: int,
+    mode: Literal["create"],
+    **kwargs: Any,
+) -> list[TModel]: ...
+
+
+@overload
+def bulk_method_in_steps[TModel: Model](
+    model: type[TModel],
+    bulk: Iterable[TModel],
+    step: int,
+    mode: Literal["update"],
+    **kwargs: Any,
+) -> int: ...
+
+
+@overload
+def bulk_method_in_steps[TModel: Model](
+    model: type[TModel],
+    bulk: Iterable[TModel],
+    step: int,
+    mode: Literal["delete"],
+    **kwargs: Any,
+) -> tuple[int, dict[str, int]]: ...
+
+
+def bulk_method_in_steps[TModel: Model](
+    model: type[TModel],
+    bulk: Iterable[TModel],
     step: int,
     mode: MODE_TYPES,
     **kwargs: Any,
-) -> int | tuple[int, dict[str, int]] | list[Model]:
+) -> int | tuple[int, dict[str, int]] | list[TModel]:
     """Execute bulk operations on model instances in steps with transaction handling.
 
     This is the core function that handles bulk create, update, or delete operations
@@ -171,14 +201,48 @@ def bulk_method_in_steps(
     )
 
 
+# Overloads for bulk_method_in_steps_atomic
+@overload
 @transaction.atomic
-def bulk_method_in_steps_atomic(
-    model: type[Model],
-    bulk: Iterable[Model],
+def bulk_method_in_steps_atomic[TModel: Model](
+    model: type[TModel],
+    bulk: Iterable[TModel],
+    step: int,
+    mode: Literal["create"],
+    **kwargs: Any,
+) -> list[TModel]: ...
+
+
+@overload
+@transaction.atomic
+def bulk_method_in_steps_atomic[TModel: Model](
+    model: type[TModel],
+    bulk: Iterable[TModel],
+    step: int,
+    mode: Literal["update"],
+    **kwargs: Any,
+) -> int: ...
+
+
+@overload
+@transaction.atomic
+def bulk_method_in_steps_atomic[TModel: Model](
+    model: type[TModel],
+    bulk: Iterable[TModel],
+    step: int,
+    mode: Literal["delete"],
+    **kwargs: Any,
+) -> tuple[int, dict[str, int]]: ...
+
+
+@transaction.atomic
+def bulk_method_in_steps_atomic[TModel: Model](
+    model: type[TModel],
+    bulk: Iterable[TModel],
     step: int,
     mode: MODE_TYPES,
     **kwargs: Any,
-) -> int | tuple[int, dict[str, int]] | list[Model]:
+) -> int | tuple[int, dict[str, int]] | list[TModel]:
     """Bulk create, update or delete the given list of objects in steps.
 
     WHEN BULK CREATING OR UPDATING A BULK
@@ -236,6 +300,25 @@ def get_step_chunks(
         yield (chunk,)  # bc concurrent_loop expects a tuple of args
 
 
+# Overloads for get_bulk_method
+@overload
+def get_bulk_method(
+    model: type[Model], mode: Literal["create"], **kwargs: Any
+) -> Callable[[list[Model]], list[Model]]: ...
+
+
+@overload
+def get_bulk_method(
+    model: type[Model], mode: Literal["update"], **kwargs: Any
+) -> Callable[[list[Model]], int]: ...
+
+
+@overload
+def get_bulk_method(
+    model: type[Model], mode: Literal["delete"], **kwargs: Any
+) -> Callable[[list[Model]], tuple[int, dict[str, int]]]: ...
+
+
 def get_bulk_method(
     model: type[Model], mode: MODE_TYPES, **kwargs: Any
 ) -> Callable[[list[Model]], list[Model] | int | tuple[int, dict[str, int]]]:
@@ -283,9 +366,28 @@ def get_bulk_method(
     return bulk_method
 
 
-def flatten_bulk_in_steps_result(
-    result: list[Any], mode: str
-) -> int | tuple[int, dict[str, int]] | list[Model]:
+# Overloads for flatten_bulk_in_steps_result
+@overload
+def flatten_bulk_in_steps_result[TModel: Model](
+    result: list[list[TModel]], mode: Literal["create"]
+) -> list[TModel]: ...
+
+
+@overload
+def flatten_bulk_in_steps_result[TModel: Model](
+    result: list[int], mode: Literal["update"]
+) -> int: ...
+
+
+@overload
+def flatten_bulk_in_steps_result[TModel: Model](
+    result: list[tuple[int, dict[str, int]]], mode: Literal["delete"]
+) -> tuple[int, dict[str, int]]: ...
+
+
+def flatten_bulk_in_steps_result[TModel: Model](
+    result: list[int] | list[tuple[int, dict[str, int]]] | list[list[TModel]], mode: str
+) -> int | tuple[int, dict[str, int]] | list[TModel]:
     """Flatten and aggregate results from multithreaded bulk operations.
 
     Processes the results returned from parallel bulk operations and aggregates
@@ -308,10 +410,12 @@ def flatten_bulk_in_steps_result(
     if mode == MODE_UPDATE:
         # formated as [1000, 1000, ...]
         # since django 4.2 bulk_update returns the count of updated objects
+        result = cast("list[int]", result)
         return int(sum(result))
     if mode == MODE_DELETE:
         # formated as [(count, {model_name: count, model_cascade_name: count}), ...]
         # join the results to get the total count of deleted objects
+        result = cast("list[tuple[int, dict[str, int]]]", result)
         total_count = 0
         count_sum_by_model: defaultdict[str, int] = defaultdict(int)
         for count_sum, count_by_model in result:
@@ -321,6 +425,7 @@ def flatten_bulk_in_steps_result(
         return (total_count, dict(count_sum_by_model))
     if mode == MODE_CREATE:
         # formated as [[obj1, obj2, ...], [obj1, obj2, ...], ...]
+        result = cast("list[list[TModel]]", result)
         return [item for sublist in result for item in sublist]
 
     msg = f"Invalid method. Must be one of {MODES}"
@@ -354,10 +459,10 @@ def bulk_delete(
     return query_set.delete()
 
 
-def bulk_create_bulks_in_steps(
-    bulk_by_class: dict[type[Model], Iterable[Model]],
+def bulk_create_bulks_in_steps[TModel: Model](
+    bulk_by_class: dict[type[TModel], Iterable[TModel]],
     step: int = STANDARD_BULK_SIZE,
-) -> dict[type[Model], list[Model]]:
+) -> dict[type[TModel], list[TModel]]:
     """Create multiple bulks of different model types in dependency order.
 
     Takes a dictionary mapping model classes to lists of instances and creates
@@ -379,7 +484,7 @@ def bulk_create_bulks_in_steps(
     models_ = list(bulk_by_class.keys())
     ordered_models = topological_sort_models(models=models_)
 
-    results = {}
+    results: dict[type[TModel], list[TModel]] = {}
     for model_ in ordered_models:
         bulk = bulk_by_class[model_]
         result = bulk_create_in_steps(model=model_, bulk=bulk, step=step)

@@ -68,8 +68,8 @@ def get_model_meta(model: type[Model]) -> "Options[Model]":
     return model._meta  # noqa: SLF001
 
 
-def get_fields(
-    model: type[Model],
+def get_fields[TModel: Model](
+    model: type[TModel],
 ) -> "list[Field[Any, Any] | ForeignObjectRel | GenericForeignKey]":
     """Get all fields from a Django model including relationships.
 

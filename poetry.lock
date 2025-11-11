@@ -1140,6 +1140,25 @@ pygments = ">=2.7.2"
 dev = ["argcomplete", "attrs (>=19.2)", "hypothesis (>=3.56)", "mock", "requests", "setuptools", "xmlschema"]
 
 [[package]]
+name = "pytest-django"
+version = "4.11.1"
+description = "A Django plugin for pytest."
+optional = false
+python-versions = ">=3.8"
+groups = ["dev"]
+files = [
+    {file = "pytest_django-4.11.1-py3-none-any.whl", hash = "sha256:1b63773f648aa3d8541000c26929c1ea63934be1cfa674c76436966d73fe6a10"},
+    {file = "pytest_django-4.11.1.tar.gz", hash = "sha256:a949141a1ee103cb0e7a20f1451d355f83f5e4a5d07bdd4dcfdd1fd0ff227991"},
+]
+
+[package.dependencies]
+pytest = ">=7.0.0"
+
+[package.extras]
+docs = ["sphinx", "sphinx_rtd_theme"]
+testing = ["Django", "django-configurations (>=2.0)"]
+
+[[package]]
 name = "pytest-mock"
 version = "3.15.1"
 description = "Thin-wrapper around the mock package for easier use with pytest"
@@ -1340,15 +1359,15 @@ files = [
 
 [[package]]
 name = "secretstorage"
-version = "3.4.0"
+version = "3.4.1"
 description = "Python bindings to FreeDesktop.org Secret Service API"
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 markers = "sys_platform == \"linux\""
 files = [
-    {file = "secretstorage-3.4.0-py3-none-any.whl", hash = "sha256:0e3b6265c2c63509fb7415717607e4b2c9ab767b7f344a57473b779ca13bd02e"},
-    {file = "secretstorage-3.4.0.tar.gz", hash = "sha256:c46e216d6815aff8a8a18706a2fbfd8d53fcbb0dce99301881687a1b0289ef7c"},
+    {file = "secretstorage-3.4.1-py3-none-any.whl", hash = "sha256:c55d57b4da3de568d8c3af89dad244ab24c35ca1da8625fc1b550edf005ebc41"},
+    {file = "secretstorage-3.4.1.tar.gz", hash = "sha256:a799acf5be9fb93db609ebaa4ab6e8f1f3ed5ae640e0fa732bfea59e9c3b50e8"},
 ]
 
 [package.dependencies]
@@ -1585,14 +1604,14 @@ test = ["covdefaults (>=2.3)", "coverage (>=7.2.7)", "coverage-enable-subprocess
 
 [[package]]
 name = "winipedia-utils"
-version = "0.7.9"
+version = "0.7.10"
 description = "A package with many utility functions"
 optional = false
 python-versions = ">=3.12"
 groups = ["main"]
 files = [
-    {file = "winipedia_utils-0.7.9-py3-none-any.whl", hash = "sha256:4ba111b14c5bfab7d7c3074be6ec1e4c57307ed5128e4415328869d45c89c3cd"},
-    {file = "winipedia_utils-0.7.9.tar.gz", hash = "sha256:8732c6353ecd26dc517c28b17b90d6e9528cce769d0f65c9ae5ab2c0efad7c51"},
+    {file = "winipedia_utils-0.7.10-py3-none-any.whl", hash = "sha256:31bfac4800916993a52579e8395629938200d5c2c3e71411b9e2db9f232446db"},
+    {file = "winipedia_utils-0.7.10.tar.gz", hash = "sha256:0e1f2d9f7eb8934b1c5ad25b093aa3b21ef1ba6c3220500d9bf559341136d1ce"},
 ]
 
 [package.dependencies]
@@ -1613,4 +1632,4 @@ tqdm = "*"
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.12"
-content-hash = "cae1642a68b8fb9fa35f5c864951d924c0b024a9f11a0a15e34c1d09afc79b48"
+content-hash = "fa9a35e3c5b70b581246ef7b6a8e8b6c65ce74f697522de764ff5d58b7020261"
