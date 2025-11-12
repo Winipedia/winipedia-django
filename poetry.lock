@@ -1604,14 +1604,14 @@ test = ["covdefaults (>=2.3)", "coverage (>=7.2.7)", "coverage-enable-subprocess
 
 [[package]]
 name = "winipedia-utils"
-version = "0.7.11"
+version = "0.7.13"
 description = "A package with many utility functions"
 optional = false
 python-versions = ">=3.12"
 groups = ["main"]
 files = [
-    {file = "winipedia_utils-0.7.11-py3-none-any.whl", hash = "sha256:41d4035c9d9efe569d7a867d71a30d64ea85ef84f67c4aa3d4195dd69b2b82ae"},
-    {file = "winipedia_utils-0.7.11.tar.gz", hash = "sha256:2fe3d6ff9d958e7677d32c1ae96d51b1df720cdb8d422ba852d1ff8507252956"},
+    {file = "winipedia_utils-0.7.13-py3-none-any.whl", hash = "sha256:4aeddd3c66ee46661a083d006b05cba3562928baaf53bc4c4fd52df9e1900ac5"},
+    {file = "winipedia_utils-0.7.13.tar.gz", hash = "sha256:cbaafd28509dbf4c6203fa0afa84ec8fffc63bf5da755bac63c6eaafbe51ee15"},
 ]
 
 [package.dependencies]
