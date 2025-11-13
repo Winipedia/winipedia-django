@@ -59,4 +59,4 @@ files = "."
 testpaths = ["tests"]
 
 [tool.bandit]
-exclude_dirs = ["experiment.py"]
+exclude_dirs = ["./experiment.py","experiment.py"]
