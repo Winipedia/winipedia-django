@@ -1,6 +1,6 @@
 [project]
 name = "winipedia-django"
-version = "0.2.40"
+version = "0.2.41"
 description = "A utils package for django"
 authors = [
     {name = "Winipedia",email = "win.steveker@gmx.de"}
